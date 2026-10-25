@@ -1,0 +1,108 @@
+openapi: 3.1.0
+info:
+  title: ches.dev Service Status API
+  version: 1.0.0
+  description: Public, read-only status for Minecraft and other monitored services.
+servers:
+  - url: https://api.ches.dev
+paths:
+  /healthz:
+    get:
+      operationId: getApiHealth
+      summary: Check whether the API process is responding
+      responses:
+        '200':
+          description: API process is responding.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                ok: true
+  /v1/services:
+    get:
+      operationId: getServiceStatus
+      summary: Get the latest status of all monitored services
+      description: Returns HTTP 200 even when stale is true. Inspect stale before treating the data as current.
+      responses:
+        '200':
+          description: Current, cached, or partially available service-status snapshot.
+          headers:
+            Cache-Control:
+              description: Fresh results use public, max-age=5; stale results use no-store.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceStatusResponse'
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      required: [ok]
+      properties:
+        ok:
+          type: boolean
+          const: true
+    ServiceState:
+      type: string
+      enum: [running, offline, starting, stopping, restarting, paused, unknown]
+    MonitoredService:
+      type: object
+      required: [id, name, category, active, state, checkedAt]
+      properties:
+        id:
+          type: string
+          description: Stable machine-readable identifier.
+        name:
+          type: string
+          description: Human-readable display name.
+        category:
+          type: string
+          description: Service grouping. Known values include minecraft and web.
+        publicUrl:
+          type: string
+          format: uri
+          description: Public HTTPS URL when the service has one.
+        active:
+          type: boolean
+          description: True only when state is running.
+        state:
+          $ref: '#/components/schemas/ServiceState'
+        checkedAt:
+          type: string
+          format: date-time
+          description: Time the underlying service check or container snapshot was taken.
+    StatusSummary:
+      type: object
+      required: [active, inactive, unknown]
+      properties:
+        active:
+          type: integer
+          minimum: 0
+        inactive:
+          type: integer
+          minimum: 0
+          description: Known non-running services; excludes unknown services.
+        unknown:
+          type: integer
+          minimum: 0
+    ServiceStatusResponse:
+      type: object
+      required: [generatedAt, stale, summary, services]
+      properties:
+        generatedAt:
+          type: string
+          format: date-time
+          description: Time this response snapshot was assembled.
+        stale:
+          type: boolean
+          description: True when Minecraft discovery or container data could not be refreshed.
+        summary:
+          $ref: '#/components/schemas/StatusSummary'
+        services:
+          type: array
+          description: All discovered and configured services. Array order is not guaranteed.
+          items:
+            $ref: '#/components/schemas/MonitoredService'

@@ -1,0 +1,31 @@
+[Unit]
+Description=Local service status API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=service-status
+Group=service-status
+WorkingDirectory=/opt/service-status-api
+Environment=NODE_ENV=production
+Environment=SERVICE_STATUS_CONFIG=/etc/service-status-api/services.json
+ExecStart=/usr/bin/node /opt/service-status-api/dist/server.js
+Restart=on-failure
+RestartSec=3s
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+RestrictRealtime=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target

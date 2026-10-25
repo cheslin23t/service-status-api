@@ -1,0 +1,11 @@
+[Unit]
+Description=Refresh Pterodactyl container status
+
+[Timer]
+OnBootSec=5s
+OnUnitActiveSec=10s
+AccuracySec=1s
+Unit=service-status-collector.service
+
+[Install]
+WantedBy=timers.target

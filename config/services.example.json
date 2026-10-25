@@ -1,0 +1,22 @@
+{
+  "host": "127.0.0.1",
+  "port": 5053,
+  "pollIntervalMs": 10000,
+  "staleAfterMs": 30000,
+  "dockerSnapshotPath": "/run/service-status-api/docker.json",
+  "pterodactyl": {
+    "baseUrl": "http://127.0.0.1:8080",
+    "tokenFile": "/etc/service-status-api/pterodactyl-api-key",
+    "timeoutMs": 3000
+  },
+  "services": [
+    {
+      "id": "images-ches-dev",
+      "name": "images.ches.dev",
+      "category": "web",
+      "healthUrl": "http://127.0.0.1:5052/healthz",
+      "publicUrl": "https://images.ches.dev",
+      "timeoutMs": 2000
+    }
+  ]
+}
